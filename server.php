@@ -105,6 +105,7 @@ function upload_files()
         throw new RuntimeException('Failed to move uploaded file.');
       }
     }
+    // разрываем соединение
     session_write_close();
     echo json_encode('Files are uploaded successfully. ');
   } catch (RuntimeException $e) {
