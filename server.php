@@ -23,15 +23,11 @@ function cors()
 
     exit(0);
   }
-
-  // echo "You have CORS!";
 }
-function upload_files()
-{
-  $ACCEPTABLE_FILE_SIZE = 5 * 1024 * 1024;
-  $dir =  'C:/Users/User/Desktop/programming/programming/php/';
 
-  $services = htmlspecialchars($_POST["services"]);
+function create_directory()
+{
+  $dir =  'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
   $matching_services_and_directories  = array(
     'ДМВ' => 'dmv',
     'ДАВС' => 'davs',
@@ -46,11 +42,22 @@ function upload_files()
     'СЗДОСС' => 'szdoss',
     'Т' => 't',
   );
+  // переданные поля в запросе
+  $posts =  array_keys($_POST);
+  foreach ($posts as $post) {
+    if ($post === 'services') {
+      $services = $_POST['services'];
+      $service = $matching_services_and_directories[$services];
+      $dir .= $service . '/';
+    }
+  }
+  return $dir;
+}
+function upload_files()
+{
+  $ACCEPTABLE_FILE_SIZE = 5 * 1024 * 1024;
 
-  $dir .= $matching_services_and_directories[$services] . '/';
-  $service = $matching_services_and_directories[$services];
   $keys = array_keys($_FILES);
-  $uploaddir = '/test';
   try {
     foreach ($keys as $key) {
       $file = $_FILES[$key];
@@ -78,19 +85,30 @@ function upload_files()
       if ($file['size'] > $ACCEPTABLE_FILE_SIZE)
         throw new RuntimeException('Exceeded filesize limit.');
 
-      $uploaddir = './test/';
-      $uploadfile = $uploaddir . basename($file['name']);
+
+      // каталог для загрузки
+      $upload_dir = create_directory();
+      // регион
+      $region = explode("_", $key)[0];
+      // если были указаны регионы
+      if ($region != '0')
+        $upload_dir .= $region . '/';
+      // создаем вложенную папку, если такой не было
+      if (!file_exists($upload_dir)) {
+        mkdir($upload_dir, 0700, true);
+      }
+      $uploadfile = $upload_dir . basename($file['name']);
       if (!move_uploaded_file(
         $file['tmp_name'],
         $uploadfile,
       )) {
         throw new RuntimeException('Failed to move uploaded file.');
       }
-
-      echo 'File is uploaded successfully.';
     }
+    session_write_close();
+    echo json_encode('Files are uploaded successfully. ');
   } catch (RuntimeException $e) {
-    echo $e->getMessage();
+    echo json_encode($e->getMessage());
   }
 }
 
