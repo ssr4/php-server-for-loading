@@ -25,7 +25,7 @@ function cors()
   }
 }
 
-function get_directory()
+function create_directory()
 {
   $dir =  'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
   $matching_services_and_directories  = array(
@@ -85,12 +85,25 @@ function upload_files()
       if ($file['size'] > $ACCEPTABLE_FILE_SIZE)
         throw new RuntimeException('Exceeded filesize limit.');
 
-      $upload_dir = get_directory();
-      // получаем номер региона
+
+      // каталог для загрузки
+      $upload_dir = create_directory();
+      // регион
       $region = explode("_", $key)[0];
-      $upload_dir .= $region . '/';
-      if (!create_directory_and_upload_file($upload_dir, $file))
+      // если были указаны регионы
+      if ($region != '0')
+        $upload_dir .= $region . '/';
+      // создаем вложенную папку, если такой не было
+      if (!file_exists($upload_dir)) {
+        mkdir($upload_dir, 0700, true);
+      }
+      $uploadfile = $upload_dir . basename($file['name']);
+      if (!move_uploaded_file(
+        $file['tmp_name'],
+        $uploadfile,
+      )) {
         throw new RuntimeException('Failed to move uploaded file.');
+      }
     }
     // разрываем соединение
     session_write_close();
@@ -98,26 +111,6 @@ function upload_files()
   } catch (RuntimeException $e) {
     echo json_encode($e->getMessage());
   }
-}
-
-function create_directory_and_upload_file($dir, $file)
-{
-  if (!file_exists($dir)) {
-    mkdir($dir, 0777, true);
-  }
-  $uploadfile = $dir . convert_date() . '_' . basename($file['name']);
-  if (!move_uploaded_file(
-    $file['tmp_name'],
-    $uploadfile,
-  )) {
-    // throw new RuntimeException('Failed to move uploaded file.');
-    return false;
-  } else return true;
-}
-function convert_date()
-{
-  $date = new DateTime();
-  return $date->format('d-m-Y');
 }
 
 cors();
