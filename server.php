@@ -105,14 +105,18 @@ function create_directory_and_upload_file($dir, $file)
   if (!file_exists($dir)) {
     mkdir($dir, 0777, true);
   }
-  $uploadfile = $dir . convert_date() . '_' . basename($file['name']);
+  // $uploadfile = $dir . convert_date() . '_' . basename($file['name']);
+  $uploadfile = $dir . basename($file['name']);
   if (!move_uploaded_file(
     $file['tmp_name'],
     $uploadfile,
   )) {
     // throw new RuntimeException('Failed to move uploaded file.');
     return false;
-  } else return true;
+  } else {
+    chmod($uploadfile, 0777);
+    return true;
+  };
 }
 function convert_date()
 {
