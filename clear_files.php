@@ -2,88 +2,73 @@
 // вывод ошибок при отладке
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-
-require_once 'Cors.php';
-$cors = new Cors();
-$cors->cors_policy();
-
-function delete_files()
+function cors_policy()
 {
-  // $dir = '';
-  $dir = 'C:/Users/User/Desktop/programming/programming/php/server-for-loading/services/';
-  $scanned_directory = array_diff(scandir($dir), array('..', '.'));
-  // print_r($scanned_directory);
-  $services = json_decode(file_get_contents('service/service.json', true));
-  $array = json_decode(json_encode($services), true);
-  foreach ($scanned_directory as $directory) {
-    print_r($directory);
-    remove_directory($dir . $directory);
+  // Allow from any origin
+  if (isset($_SERVER['HTTP_ORIGIN'])) {
+    // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
+    // you want to allow, and if so:
+    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Max-Age: 86400');    // cache for 1 day
   }
-  // foreach ($array['services'] as $item) {
 
-  //   foreach ($array['extensions'] as $extension) {
-  //     echo $dir . $item . "/*." . $extension;
+  // Access-Control headers are received during OPTIONS requests
+  if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
-  //   }
-  // }
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+      // may also be using PUT, PATCH, HEAD etc
+      header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-  // if (file_exists($dir)) {
-  //   $file_date = date_create('@'  . filemtime($dir));
-  //   $current_date = new DateTime('tomorrow');
-  //   $interval = $current_date->diff($file_date);
-  //   echo $interval->days;
-  //   remove_directory($dir);
-  // }
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+      header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 
-
-  // foreach ($services as $service) {
-  //   print_r($service);
-  // }
-  // print_r($services);
-  // array_map('unlink', glob($dir . "*.txt"));
-
-
-
+    exit(0);
+  }
 }
 
-function remove_directory($dir)
+function deleteAllFilesInDirectory(string $dir)
 {
-
-  // if (!is_dir($file)) {
-  //   //удаление файла в случае. если джата создания меньше текущей даты на сутки
-  //   // return unlink($file);
-  //   $yesterdayEnd = strtotime('yesterday 23:59:59');
-  //   $fileModificationTime = filectime($file);
-  //   if ($fileModificationTime <= $yesterdayEnd) {
-  //     echo "Yes";
-  //   }
-  //   return unlink($file);
-  // }
-
+  // ошибка это не директория
   if (!is_dir($dir)) {
-    $file = $dir;
-    $yesterdayEnd = strtotime('yesterday 23:59:59');
-    $fileModificationTime = filectime($file);
-    if ($fileModificationTime <= $yesterdayEnd) {
-      echo 'Yes';
-      return;
-    }
-    echo 'No';
-    return;
-    // return unlink($file);
+    throw new InvalidArgumentException('$directory is not a directory.');
   }
 
-  foreach (scandir($dir) as $item) {
-    if ($item == '.' || $item == '..') continue;
-    if (!remove_directory($dir . '/' . $item)) {
-      echo $dir . $item;
-      chmod($dir . $item, 0777);
-      if (!remove_directory($dir . '/' . $item)) return false;
+  ### RecursiveIteratorIterator и RecursiveDirectoryIterator - эти классы 
+  ### позволяют рекрсивнро обй  ти все файлы и директории внутри заданной 
+  ### FilesystemIterator::SKIP_DOTS - пропуск вложенной и родительской дир
+  ### RecursiveIteratorIterator::CHILD_FIRST - удаление директорий и поддир. до родительской 
+
+  foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $item) {
+    if ($item->isFile()) {
+      ### получение вчерашних суток
+      ### получение времени создания файла
+      $yesterdayEnd = strtotime('yesterday 23:59:59');
+      $fileCreationTime = filectime($item);
+      if ($fileCreationTime <= $yesterdayEnd) {
+        // удаляем если файл старый
+        unlink($item->getRealPath());
+      }
+    } elseif ($item->isDir()) {
+      if (count(scandir($dir)) == 2) {
+        rmdir($item->getRealPath());
+      }
     }
   }
   if (count(scandir($dir)) == 2) {
-    return rmdir($dir);
+    rmdir($dir);
   }
 }
 
-delete_files();
+try {
+  cors_policy();
+  $dir =
+    'C:/Users/User/Desktop/programming/programming/php/server-for-loading/services/';
+  deleteAllFilesInDirectory($dir);
+} catch (InvalidArgumentException  $e) {
+  http_response_code(403);
+  echo "Ошибка: " . $e->getMessage();
+} catch (Exception $e) {
+  http_response_code(400);
+  echo "Ошибка при удалении: " . $e->getMessage();
+}

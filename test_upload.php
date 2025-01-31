@@ -35,7 +35,7 @@ function get_directory()
 }
 function upload_files()
 {
-  $ACCEPTABLE_FILE_SIZE = 5 * 1024 * 1024;
+  $ACCEPTABLE_FILE_SIZE = 8 * 1024 * 1024;
   $keys = array_keys($_FILES);
   try {
     foreach ($keys as $key) {
@@ -75,7 +75,7 @@ function upload_files()
         http_response_code(
           413
         );
-        header('HTTP/1.0 404 Internal Server Error');
+        // header('HTTP/1.0 404 Internal Server Error');
         exit();
         // throw new RuntimeException('Exceeded filesize limit.');
       }
