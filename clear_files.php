@@ -62,9 +62,13 @@ function deleteAllFilesInDirectory(string $dir)
 
 try {
   cors_policy();
-  $dir =
-    'C:/Users/User/Desktop/programming/programming/php/server-for-loading/services/';
-  deleteAllFilesInDirectory($dir);
+  // $dir =
+  //   '/usr/share/nginx/html/build/storage/services_test/';
+  $services_array = array('services_test', 'orders_test');
+  foreach ($services_array as $service) {
+    $dir = 'C:/Users/User/Desktop/programming/programming/php/server-for-loading/' . $service . '/';
+    deleteAllFilesInDirectory($dir);
+  }
 } catch (InvalidArgumentException  $e) {
   http_response_code(403);
   echo "Ошибка: " . $e->getMessage();

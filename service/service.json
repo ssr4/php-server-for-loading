@@ -15,12 +15,6 @@
     "Т": "t"
   },
   "extensions": [
-    "txt",
-    "pdf",
-    "csv",
-    "xls",
-    "xlsx",
-    "doc",
-    "docx"
+    "pdf"
   ]
 }
