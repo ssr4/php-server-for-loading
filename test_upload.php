@@ -11,24 +11,6 @@ require_once 'Cors.php';
 $cors = new Cors();
 function get_directory()
 {
-  $dir =  'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
-  $matching_services_and_directories  = array(
-    'ДМВ' => 'dmv',
-    'ДАВС' => 'davs',
-    'Д' => 'd',
-    'ДИ' => 'di',
-    'ДМ' => 'dm',
-    'ДМС' => 'dms',
-    'ДПО' => 'dpo',
-    'РДЖВ' => 'rdzv',
-    'НТЭ' => 'nte',
-    'ДЭЗ' => 'dez',
-    'НС' => 'ns',
-    'СЗДОСС' => 'szdoss',
-    'Т' => 't',
-    'РЦДМ' => 'rcdm',
-    'ЦУСИ' => 'cusi',
-  );
   // переданные поля в запросе
   $posts =  array_keys($_POST);
   // директория в которую кладем
@@ -36,11 +18,9 @@ function get_directory()
 
   // создаем вложенные папки
   foreach ($posts as $post) {
-    if ($post == 'orders' || $post == 'services') {
-      $dir .=  $post . '_test/';
-      $services = $_POST[$post];
-      $service = $matching_services_and_directories[$services];
-      $dir .= $service . '/';
+    if ($post == 'directory') {
+      $service = $_POST[$post] . '/';
+      $dir .= $service;
     }
   }
   return $dir;
@@ -48,17 +28,21 @@ function get_directory()
 function upload_files()
 {
   try {
-    // получаем файлы по регионам
-    $regions = explode(",", $_POST['regions']);
-    $region_number = 0;
-    if (!isset($_POST['orders'])) {
-      foreach ($regions as $region) {
-        $region_number += 1;
-        if ((int) $region) {
-          upload_file($region_number);
+    // если были переданы регионы
+    if (isset($_POST['regions'])) {
+      // получаем файлы по регионам
+      $regions = explode(",", $_POST['regions']);
+      $region_number = 0;
+      if (count($regions)) {
+        foreach ($regions as $region) {
+          $region_number += 1;
+          if ((int) $region) {
+            upload_file($region_number);
+          }
         }
       }
     } else upload_file();
+
 
     // разрываем соединение
     close_conn();
@@ -108,7 +92,6 @@ function upload_file($region_number = '')
     }
 
     $upload_dir = get_directory() . $region_number . '/';
-
     if (!create_directory_and_upload_file($upload_dir, $file))
       throw new RuntimeException('Failed to move uploaded file.');
   }
