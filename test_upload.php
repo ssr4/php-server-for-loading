@@ -14,13 +14,13 @@ function get_directory()
   // переданные поля в запросе
   $posts =  array_keys($_POST);
   // директория в которую кладем
-  $dir = 'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
+  // $dir = 'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
 
   // создаем вложенные папки
   foreach ($posts as $post) {
     if ($post == 'directory') {
-      $service = $_POST[$post] . '/';
-      $dir .= $service;
+      $dir = $_POST[$post] . '/';
+      // $dir .= $service;
     }
   }
   return $dir;
