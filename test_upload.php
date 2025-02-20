@@ -8,21 +8,30 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 require_once 'Cors.php';
+require_once 'auth/validate_token.php';
 $cors = new Cors();
+$cors->cors_policy();
+
+try {
+  $header_auth = apache_request_headers()['Authorization'];
+  if (isset($header_auth)) {
+    // получаем токен и подключаем файл конфига
+    $token = new Token($header_auth, parse_ini_file("config.ini"));
+    if (!$token->isValidToken()) {
+      http_response_code(403);
+      throw new RuntimeException('is not a valid token!');
+    }
+    upload_files();
+  } else throw new RuntimeException('there is no token!');
+} catch (Exception $e) {
+  echo json_encode("Error! " . $e->getMessage());
+  throw new RuntimeException($e->getMessage());
+}
+
 function get_directory()
 {
-  // переданные поля в запросе
-  $posts =  array_keys($_POST);
-  // директория в которую кладем
-  // $dir = 'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
-
-  // создаем вложенные папки
-  foreach ($posts as $post) {
-    if ($post == 'directory') {
-      $dir = $_POST[$post] . '/';
-      // $dir .= $service;
-    }
-  }
+  // создаем вложенные папки через переданные поля в запросе
+  $dir = $_POST['directory'] . '/';
   return $dir;
 }
 function upload_files()
@@ -42,7 +51,6 @@ function upload_files()
         }
       }
     } else upload_file();
-
 
     // разрываем соединение
     close_conn();
@@ -102,11 +110,7 @@ function create_directory_and_upload_file($dir, $file)
   if (!file_exists($dir)) {
     mkdir($dir, 0777, true);
   }
-  // $uploadfile = $dir . convert_date() . '_' . basename($file['name']);
   $uploadfile = $dir . $file['name'];
-  // file_put_contents('./tmp/input.log', print_r($_POST . '  ' . $file['name'] . '    ' . $uploadfile . PHP_EOL, true), FILE_APPEND);
-  // echo json_encode($dir . $file['name'] . PHP_EOL);
-
   if (!copy(
     $file['tmp_name'],
     $uploadfile,
@@ -129,31 +133,3 @@ function close_conn()
 {
   session_write_close();
 }
-
-// function cors()
-// {
-//   // Allow from any origin
-//   if (isset($_SERVER['HTTP_ORIGIN'])) {
-//     // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
-//     // you want to allow, and if so:
-//     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-//     header('Access-Control-Allow-Credentials: true');
-//     header('Access-Control-Max-Age: 86400');    // cache for 1 day
-//   }
-
-//   // Access-Control headers are received during OPTIONS requests
-//   if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-
-//     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-//       // may also be using PUT, PATCH, HEAD etc
-//       header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-
-//     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-//       header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
-
-//     exit(0);
-//   }
-// }
-$cors->cors_policy();
-// cors();
-upload_files();
