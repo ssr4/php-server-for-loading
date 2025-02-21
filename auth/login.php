@@ -25,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $result = pg_fetch_assoc($result);
     if ($username && password_verify($password, $result['password_hash'])) {
+      $curr_time = time();
+      $expires_at = $curr_time + 3600;
       $header = [
         "alg" => "HS256",
         "typ" => "JWT"
@@ -32,14 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $payload = [
         'iss' => 'inform_department', // Издатель
         'name' => $username,   // Субъект
-        'iat' => time(),        // Время создания
-        'exp' => time() + 3600, // Срок действия (1 час)
+        'iat' => $curr_time,        // Время создания
+        'exp' => $expires_at, // Срок действия (1 час)
       ];
       // пока тест test
       $secret_key = ['secret' => $config['secret_key']];
       $jwt = jwtEncode($header)  .  jwtEncode($payload) . '\n' . jwtEncode($secret_key);
       http_response_code(200);
-      echo json_encode(['token' => $jwt, 'role' => $result['role']]);
+      echo json_encode(['token' => $jwt, 'role' => $result['role'], 'expires_at' =>  $expires_at]);
       close_conn();
     } else {
       http_response_code(405);

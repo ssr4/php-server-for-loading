@@ -18,12 +18,13 @@ try {
     // получаем токен и подключаем файл конфига
     $token = new Token($header_auth, parse_ini_file("config.ini"));
     if (!$token->isValidToken()) {
-      http_response_code(403);
+      http_response_code(401);
       throw new RuntimeException('is not a valid token!');
     }
     upload_files();
   } else throw new RuntimeException('there is no token!');
 } catch (Exception $e) {
+  http_response_code(401);
   echo json_encode("Error! " . $e->getMessage());
   throw new RuntimeException($e->getMessage());
 }

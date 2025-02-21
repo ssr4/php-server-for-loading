@@ -17,10 +17,8 @@ class Token
         // Удаление префикса "Bearer "
         $this->_token = str_replace('Bearer ', '', $this->_token);
         if ($this->parseToken($this->_token)) {
-          // echo json_encode(['isValid' => true]);
           return true;
         } else {
-          // echo json_encode(['isValid' => false]);
           return false;
         }
       } else {
@@ -48,8 +46,10 @@ class Token
         return false;
         // throw new Exception('The token has expired or token is not valid');
       } else {
-        if ($expiration_time < time())
+        if ($expiration_time < time()) {
+          // http_response_code(413);
           return false;
+        }
         if ($secret !== $this->_config['secret_key'])
           return false;
         return true;
