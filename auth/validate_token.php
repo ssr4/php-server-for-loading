@@ -39,6 +39,7 @@ class Token
         $obj = json_decode("{" . $match[0] . "}");
         if (isset($obj->exp))
           $expiration_time = $obj->exp;
+
         if (isset($obj->secret))
           $secret =  $obj->secret;
       }
@@ -62,6 +63,11 @@ class Token
 
   public function decodeString($str)
   {
-    return base64_decode($str);
+    $str_arr = explode('.', $str);
+    $new_str = '';
+    foreach ($str_arr as $str_item) {
+      $new_str .= base64_decode($str_item);
+    }
+    return $new_str;
   }
 }
