@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 require_once 'Cors.php';
 $cors = new Cors();
-function deleteAllFilesInDirectory(string $dir)
+function deleteAllFilesInDirectory(string $dir, bool $withoutDate = false)
 {
   // ошибка это не директория
   if (!is_dir($dir)) {
@@ -18,13 +18,18 @@ function deleteAllFilesInDirectory(string $dir)
 
   foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $item) {
     if ($item->isFile()) {
-      ### получение вчерашних суток
-      ### получение времени создания файла
-      $yesterdayEnd = strtotime('yesterday 23:59:59');
-      $fileCreationTime = filectime($item);
-      if ($fileCreationTime <= $yesterdayEnd) {
-        // удаляем если файл старый
+      if ($withoutDate) {
+        // удаляем файл в независимости от времени создания
         unlink($item->getRealPath());
+      } else {
+        // получение вчерашних суток
+        // получение времени создания файла
+        $yesterdayEnd = strtotime('yesterday 23:59:59');
+        $fileCreationTime = filectime($item);
+        if ($fileCreationTime <= $yesterdayEnd) {
+          // удаляем если файл старый
+          unlink($item->getRealPath());
+        }
       }
     } elseif ($item->isDir()) {
       if (count(scandir($dir)) == 2) {
@@ -38,14 +43,19 @@ function deleteAllFilesInDirectory(string $dir)
 }
 
 try {
-  // cors_policy();
   $cors->cors_policy();
-  // $dir =
-  //   '/usr/share/nginx/html/build/storage/services_test/';
-  $services_array = array('services_test', 'orders_test');
-  foreach ($services_array as $service) {
-    $dir = '/usr/share/nginx/html/build/storage/' . $service . '/';
-    deleteAllFilesInDirectory($dir);
+  // C:/Users/User/Desktop/programming/programming/php/server-for-loading/
+  // если была передана директория
+  if (isset($_POST['dir'])) {
+    $dir =
+      'C:/Users/User/Desktop/programming/programming/php/server-for-loading/' . $_POST['dir'] . '/';
+    deleteAllFilesInDirectory($dir, true);
+  } else {
+    $services_array = array('services_test', 'orders_test');
+    foreach ($services_array as $service) {
+      $dir = '/usr/share/nginx/html/build/storage/' . $service . '/';
+      deleteAllFilesInDirectory($dir);
+    }
   }
 } catch (InvalidArgumentException  $e) {
   http_response_code(403);

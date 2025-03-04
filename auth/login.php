@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = pg_fetch_assoc($result);
     if ($username && password_verify($password, $result['password_hash'])) {
       $curr_time = time();
+      // 2 592 000 - токен на месяц
       $expires_at = $curr_time + 3600;
       $header = [
         "alg" => "HS256",
