@@ -7,12 +7,12 @@ $cors = new Cors();
 function deleteAllFilesInDirectory(string $dir, bool $withoutDate = false)
 {
   // ошибка это не директория
-  if (!is_dir($dir)) {
-    throw new InvalidArgumentException('$directory is not a directory.');
+  if (!is_dir($dir) || !file_exists($dir)) {
+    throw new InvalidArgumentException($dir . ' - is not a dir or it doesn` t exist.');
   }
 
   ### RecursiveIteratorIterator и RecursiveDirectoryIterator - эти классы 
-  ### позволяют рекрсивнро обй  ти все файлы и директории внутри заданной 
+  ### позволяют рекрсивно обойти все файлы и директории внутри заданной 
   ### FilesystemIterator::SKIP_DOTS - пропуск вложенной и родительской дир
   ### RecursiveIteratorIterator::CHILD_FIRST - удаление директорий и поддир. до родительской 
 
@@ -37,13 +37,14 @@ function deleteAllFilesInDirectory(string $dir, bool $withoutDate = false)
       }
     }
   }
-  if (count(scandir($dir)) == 2) {
+  if (count(scandir($dir)) == 1) {
     rmdir($dir);
   }
 }
 
 try {
   $cors->cors_policy();
+  // here test
   // C:/Users/User/Desktop/programming/programming/php/server-for-loading/
   // если была передана директория
   if (isset($_POST['dir'])) {
@@ -58,8 +59,8 @@ try {
     }
   }
 } catch (InvalidArgumentException  $e) {
-  http_response_code(403);
-  echo "Ошибка: " . $e->getMessage();
+  // http_response_code(404);
+  header("HTTP/1.0 404 " . $e->getMessage());
 } catch (Exception $e) {
   http_response_code(400);
   echo "Ошибка при удалении: " . $e->getMessage();

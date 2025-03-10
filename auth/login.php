@@ -65,7 +65,7 @@ function checkInTempTable($db, $username)
   if (pg_num_rows($result) === 0)
     return false;
   $result = pg_fetch_assoc($result);
-  echo json_encode(['type' => 'register', 'role' => $result['role']]);
+  echo json_encode(['registration' => 'register', 'role' => $result['role']]);
   return true;
 }
 
