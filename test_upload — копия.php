@@ -14,7 +14,8 @@ function get_directory()
   // переданные поля в запросе
   $posts =  array_keys($_POST);
   // директория в которую кладем
-  $dir = 'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
+  // $dir = 'C:/Users/User/Desktop/programming/programming/php/server-for-loading/';
+  $dir = '/usr/share/nginx/html/build/storage/';
 
   // создаем вложенные папки
   foreach ($posts as $post) {
@@ -102,11 +103,7 @@ function create_directory_and_upload_file($dir, $file)
   if (!file_exists($dir)) {
     mkdir($dir, 0777, true);
   }
-  // $uploadfile = $dir . convert_date() . '_' . basename($file['name']);
   $uploadfile = $dir . $file['name'];
-  // file_put_contents('./tmp/input.log', print_r($_POST . '  ' . $file['name'] . '    ' . $uploadfile . PHP_EOL, true), FILE_APPEND);
-  // echo json_encode($dir . $file['name'] . PHP_EOL);
-
   if (!copy(
     $file['tmp_name'],
     $uploadfile,
@@ -130,30 +127,5 @@ function close_conn()
   session_write_close();
 }
 
-// function cors()
-// {
-//   // Allow from any origin
-//   if (isset($_SERVER['HTTP_ORIGIN'])) {
-//     // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
-//     // you want to allow, and if so:
-//     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-//     header('Access-Control-Allow-Credentials: true');
-//     header('Access-Control-Max-Age: 86400');    // cache for 1 day
-//   }
-
-//   // Access-Control headers are received during OPTIONS requests
-//   if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-
-//     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-//       // may also be using PUT, PATCH, HEAD etc
-//       header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-
-//     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-//       header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
-
-//     exit(0);
-//   }
-// }
 $cors->cors_policy();
-// cors();
 upload_files();

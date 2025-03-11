@@ -49,7 +49,7 @@ try {
   // если была передана директория
   if (isset($_POST['dir'])) {
     $dir =
-      'C:/Users/User/Desktop/programming/programming/php/server-for-loading/' . $_POST['dir'] . '/';
+      '/usr/share/nginx/html/build/storage/' . $_POST['dir'] . '/';
     deleteAllFilesInDirectory($dir, true);
   } else {
     $services_array = array('services_test', 'orders_test');

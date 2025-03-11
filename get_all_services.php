@@ -11,15 +11,15 @@ $db = new DB_Conncetion();
 $db->db_connect('postgres', 'postgres');
 try {
   // here test
-  // $header_auth = apache_request_headers()['Authorization'];
-  // if (isset($header_auth)) {
-  //   // получаем токен и подключаем файл конфига
-  //   $token = new Token($header_auth, parse_ini_file("config.ini"));
-  //   if (!$token->isValidToken()) {
-  //     http_response_code(401);
-  //     throw new RuntimeException('is not a valid token!');
-  //   }
-  // } else throw new RuntimeException('there is no token!');
+  $header_auth = apache_request_headers()['Authorization'];
+  if (isset($header_auth)) {
+    // получаем токен и подключаем файл конфига
+    $token = new Token($header_auth, parse_ini_file("config.ini"));
+    if (!$token->isValidToken()) {
+      http_response_code(401);
+      throw new RuntimeException('is not a valid token!');
+    }
+  } else throw new RuntimeException('there is no token!');
   $username = $_POST['username'];
   $stmt = 'SELECT d.sl_code, d.sl_name, d.directory, regions,s.sl_full_name, d.order_description  from test.directories d inner join test.service s on d.sl_code = s.sl_code';
   if ($username === 'admin') {

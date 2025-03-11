@@ -19,6 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           join test.service srv on srv.sl_code= sel.role
           ) com");
     $insert_result = pg_execute($db->get_conn(), "my_query_insert", array($username, $hashed_password, $role));
+    if ($insert_result === false) {
+      // print pg_last_error($db->db_connect('postgres', 'postgres'));
+      throw new RuntimeException('It`s impossible to create user');
+    }
     // var_dump($insert_result);
     echo json_encode(['message' => 'User is successfully created']);
   } catch (Exception $e) {
