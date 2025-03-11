@@ -7,21 +7,22 @@ require_once 'auth/db.php';
 require_once 'auth/validate_token.php';
 $cors = new Cors();
 $cors->cors_policy();
-$db = new DB_Conncetion();
-$db->db_connect('postgres', 'postgres');
+$config = parse_ini_file('config.ini', true);
+$db = new DB_Conncetion($config['DB']);
+$db->db_connect();
 try {
   // here test
   $header_auth = apache_request_headers()['Authorization'];
   if (isset($header_auth)) {
     // получаем токен и подключаем файл конфига
-    $token = new Token($header_auth, parse_ini_file("config.ini"));
+    $token = new Token($header_auth, $config['Secret']);
     if (!$token->isValidToken()) {
       http_response_code(401);
       throw new RuntimeException('is not a valid token!');
     }
   } else throw new RuntimeException('there is no token!');
   $username = $_POST['username'];
-  $stmt = 'SELECT d.sl_code, d.sl_name, d.directory, regions,s.sl_full_name, d.order_description  from test.directories d inner join test.service s on d.sl_code = s.sl_code';
+  $stmt = 'SELECT d.sl_code, d.sl_name, d.directory, regions,s.sl_full_name, d.order_description  from accounts.directories d inner join accounts.service s on d.sl_code = s.sl_code';
   if ($username === 'admin') {
     $result = pg_prepare(
       $db->get_conn(),
@@ -49,8 +50,8 @@ try {
     echo json_encode('Error request while execute');
     exit();
   }
+  http_response_code(200);
   echo json_encode(['data' => $parsed_result]);
-  // http_response_code(200);
   session_write_close();
   exit();
 } catch (InvalidArgumentException  $e) {

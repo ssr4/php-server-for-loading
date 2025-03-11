@@ -31,7 +31,6 @@ class Token
 
   public function parseToken($token)
   {
-    // $config = parse_ini_file("../config.ini");
     $text = str_replace('\'', '', $this->decodeString($token));
     if (preg_match_all('/{([^}]*)}/', $text, $matches, PREG_OFFSET_CAPTURE)) {
       foreach ($matches[1] as $match) {

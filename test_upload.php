@@ -1,32 +1,31 @@
 <?php
-// кодировка
-header('Content-Type: text/html; charset=utf-8');
-// mb_internal_encoding("UTF-8");
-
 // вывод ошибок при отладке
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-
 require_once 'Cors.php';
-require_once 'auth/validate_token.php';
 $cors = new Cors();
 $cors->cors_policy();
-
+require_once 'auth/validate_token.php';
 try {
   $header_auth = apache_request_headers()['Authorization'];
   if (isset($header_auth)) {
     // получаем токен и подключаем файл конфига
-    $token = new Token($header_auth, parse_ini_file("config.ini"));
+    $config = parse_ini_file("config.ini", true);
+    $token = new Token($header_auth, $config['Secret']);
     if (!$token->isValidToken()) {
       http_response_code(401);
       throw new RuntimeException('is not a valid token!');
     }
-    upload_files();
   } else throw new RuntimeException('there is no token!');
-} catch (Exception $e) {
-  http_response_code(401);
-  echo json_encode("Error! " . $e->getMessage());
-  throw new RuntimeException($e->getMessage());
+  if (upload_files()) {
+    echo json_encode('Files are uploaded successfully. ');
+    http_response_code(200);
+    session_write_close();
+    exit();
+  }
+} catch (InvalidArgumentException  $e) {
+  http_response_code(403);
+  echo "Ошибка: " . $e->getMessage();
 }
 
 function get_directory()
@@ -38,6 +37,7 @@ function get_directory()
 function upload_files()
 {
   try {
+    $is_correct_uploading = 0;
     // если были переданы регионы
     if (isset($_POST['regions'])) {
       // получаем файлы по регионам
@@ -47,15 +47,14 @@ function upload_files()
         foreach ($regions as $region) {
           $region_number += 1;
           if ((int) $region) {
-            upload_file($region_number);
+            $is_correct_uploading = upload_file($region_number);
           }
         }
       }
-    } else upload_file();
-
-    // разрываем соединение
-    close_conn();
-    echo json_encode('Files are uploaded successfully. ');
+    } else $is_correct_uploading = upload_file();
+    if ($is_correct_uploading)
+      return 1;
+    else return 0;
   } catch (RuntimeException $e) {
     echo json_encode($e->getMessage());
   }
@@ -103,6 +102,7 @@ function upload_file($region_number = '')
     $upload_dir = get_directory() . $region_number . '/';
     if (!create_directory_and_upload_file($upload_dir, $file))
       throw new RuntimeException('Failed to move uploaded file.');
+    else return 1;
   }
 }
 

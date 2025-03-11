@@ -2,21 +2,26 @@
 
 class DB_Conncetion
 {
-  private $db_host = 'localhost';
+  private $db_host = '';
   private $port = '5432';
-  private $db_name     = "postgres"; //change to your db
-  private $db_username = ""; //change to your db username
-  private $db_password = ""; //enter your password
+  private $db_name     = "";
+  private $db_username = "";
+  private $db_password = "";
   private $conn;
 
-  public function db_connect($user, $password)
+  public function __construct($dbparams)
+  {
+    $this->db_host = $dbparams['db_host'];
+    $this->db_name = $dbparams['db_name'];
+    $this->db_username = $dbparams['db_username'];
+    $this->db_password = $dbparams['db_password'];
+  }
+
+  public function db_connect()
   {
     $this->conn = null;
     try {
-      // $this->conn = new PDO("mysql:host=" . $this->db_host . ";dbname=" . $this->db_name, '', '');
-      $this->conn = pg_connect("host=$this->db_host port=$this->port dbname=$this->db_name  user=$user password=$password");
-      // echo json_encode($this->conn);
-      // $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $this->conn = pg_connect("host=$this->db_host port=$this->port dbname=$this->db_name  user=$this->db_username password=$this->db_password");
     } catch (PDOException $e) {
       echo "Error " . $e->getMessage();
     }

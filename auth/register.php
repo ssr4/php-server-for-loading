@@ -4,8 +4,10 @@ $cors = new Cors();
 $cors->cors_policy();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   require_once 'db.php';
-  $db = new DB_Conncetion();
-  $db->db_connect('postgres', 'postgres');
+  $config = parse_ini_file('../config.ini', true);
+  $db = new DB_Conncetion($config['DB']);
+  $db->db_connect();
+
 
   $username = $_POST['username'];
   $password = $_POST['password'];
@@ -13,10 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
   try {
-    $stmt =  pg_prepare($db->get_conn(), "my_query_insert", "INSERT INTO  test.temp_users (username, password_hash, role) select com.username, com.password_hash, com.role from
+    $stmt =  pg_prepare($db->get_conn(), "my_query_insert", "INSERT INTO  accounts.temp_users (username, password_hash, role) select com.username, com.password_hash, com.role from
         (select username,password_hash,role from
           (select $1 as username, $2 as password_hash, $3 as role) sel
-          join test.service srv on srv.sl_code= sel.role
+          join accounts.service srv on srv.sl_code= sel.role
           ) com");
     $insert_result = pg_execute($db->get_conn(), "my_query_insert", array($username, $hashed_password, $role));
     if ($insert_result === false) {

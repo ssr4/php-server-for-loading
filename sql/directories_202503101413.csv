@@ -1,0 +1,17 @@
+"sl_name","directory","regions","sl_code","order_description"
+Администратор,/,false,admin,
+РЦДМ,orders_test/rcdm,false,rcdm,приказ ЦДИ
+ЦУСИ,orders_test/cusi,false,di,оперативный приказ
+ДМВ,services_test/dmv,true,dmv,
+НТЭ,services_test/nte,true,nte,
+Т,services_test/t,true,t,
+Д,services_test/d,true,d,
+ДПО,services_test/dpo,true,dpo,
+СЗДОСС,services_test/szdoss,true,szdoss,
+ДМ,services_test/dm,true,dm,
+ДЭЗ,services_test/dez,true,dez,
+ДМС,services_test/dms,true,dms,
+РДЖВ,services_test/rdzv,true,rdzv,
+ДАВС,services_test/davs,true,davs,
+ДИ,services_test/di,true,di,
+НС,services_test/ns,true,ns,

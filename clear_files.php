@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 require_once 'Cors.php';
 $cors = new Cors();
+$cors->cors_policy();
 function deleteAllFilesInDirectory(string $dir, bool $withoutDate = false)
 {
   // ошибка это не директория
@@ -43,18 +44,15 @@ function deleteAllFilesInDirectory(string $dir, bool $withoutDate = false)
 }
 
 try {
-  $cors->cors_policy();
-  // here test
-  // C:/Users/User/Desktop/programming/programming/php/server-for-loading/
-  // если была передана директория
+  $config = parse_ini_file('config.ini', true);
+  $dir = $config['DIR']['dir'];
   if (isset($_POST['dir'])) {
-    $dir =
-      '/usr/share/nginx/html/build/storage/' . $_POST['dir'] . '/';
+    $dir .= $_POST['dir'] . '/';
     deleteAllFilesInDirectory($dir, true);
   } else {
-    $services_array = array('services_test', 'orders_test');
+    $services_array = array('services', 'orders');
     foreach ($services_array as $service) {
-      $dir = '/usr/share/nginx/html/build/storage/' . $service . '/';
+      $dir .=  $service . '/';
       deleteAllFilesInDirectory($dir);
     }
   }
