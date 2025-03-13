@@ -5,12 +5,12 @@ error_reporting(E_ALL);
 require_once 'Cors.php';
 $cors = new Cors();
 $cors->cors_policy();
+$config = parse_ini_file("config.ini", true);
 require_once 'auth/validate_token.php';
 try {
   $header_auth = apache_request_headers()['Authorization'];
   if (isset($header_auth)) {
     // получаем токен и подключаем файл конфига
-    $config = parse_ini_file("config.ini", true);
     $token = new Token($header_auth, $config['Secret']);
     if (!$token->isValidToken()) {
       http_response_code(401);
@@ -31,7 +31,9 @@ try {
 function get_directory()
 {
   // создаем вложенные папки через переданные поля в запросе
-  $dir = $_POST['directory'] . '/';
+  global $config;
+  $dir = $config['DIR']['dir'] . $_POST['directory'] . '/';
+  // $dir = $_POST['directory'] . '/';
   return $dir;
 }
 function upload_files()
