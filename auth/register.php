@@ -28,6 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // var_dump($insert_result);
     echo json_encode(['message' => 'User is successfully created']);
   } catch (Exception $e) {
+    $db->closeConn();
     echo json_encode($e->getMessage());
+  } finally {
+    $db->closeConn();
+    exit();
   }
 }

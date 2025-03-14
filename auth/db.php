@@ -23,7 +23,7 @@ class DB_Conncetion
     try {
       $this->conn = pg_connect("host=$this->db_host port=$this->port dbname=$this->db_name  user=$this->db_username password=$this->db_password");
     } catch (PDOException $e) {
-      echo "Error " . $e->getMessage();
+      exit;
     }
     return $this->conn;
   }
@@ -31,5 +31,11 @@ class DB_Conncetion
   public function get_conn()
   {
     return $this->conn;
+  }
+
+
+  public function closeConn()
+  {
+    pg_close($this->conn);
   }
 }

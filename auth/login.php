@@ -51,9 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       throw new RuntimeException('Wrong username!');
     }
   } catch (Exception $e) {
+    $db->closeConn();
     http_response_code(401);
     closeConn();
     throw new RuntimeException($e->getMessage());
+  } finally {
+    $db->closeConn();
+    exit();
   }
 }
 

@@ -52,9 +52,11 @@ try {
   }
   http_response_code(200);
   echo json_encode(['data' => $parsed_result]);
-  session_write_close();
-  exit();
 } catch (InvalidArgumentException  $e) {
+  $db->closeConn();
   http_response_code(403);
   echo "Ошибка: " . $e->getMessage();
+} finally {
+  $db->closeConn();
+  exit();
 }

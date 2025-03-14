@@ -26,6 +26,8 @@ try {
 } catch (InvalidArgumentException  $e) {
   http_response_code(403);
   echo "Ошибка: " . $e->getMessage();
+} finally {
+  exit();
 }
 
 function get_directory()

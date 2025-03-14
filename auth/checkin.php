@@ -56,8 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit();
     }
   } catch (Exception $e) {
+    $db->closeConn();
     http_response_code(403);
     echo json_encode($e->getMessage());
+    exit();
+  } finally {
+    $db->closeConn();
     exit();
   }
 }

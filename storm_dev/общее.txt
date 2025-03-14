@@ -1,0 +1,5 @@
+tablo_content.wk_action_check – таблица со всеми мерами для текущего ШП
+tablo_content.update_storm_action_check() – процедура для заполнения (перезаписывает) вышеуказанной таблицы
+
+http://10.35.33.198:8080/orw_tablo/storm_actions_check_.php?sl_code=21 – список мер для службы  по дороге
+http://10.35.33.198:8080/orw_tablo/check_on_action.php?arr=280,272&st=1 – сервис для установки отметок по id записи в tablo_content.wk_action_check
