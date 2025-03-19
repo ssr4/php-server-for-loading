@@ -8,7 +8,7 @@ require_once 'auth/validate_token.php';
 $cors = new Cors();
 $cors->cors_policy();
 $config = parse_ini_file('config.ini', true);
-$db = new DB_Conncetion($config['DB']);
+$db = new DB_Connection($config['DB']);
 $db->db_connect();
 try {
   // here test

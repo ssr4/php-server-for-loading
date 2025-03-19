@@ -6,7 +6,7 @@ $config = parse_ini_file("../config.ini", true);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   try {
     require_once 'db.php';
-    $db = new DB_Conncetion($config['DB']);
+    $db = new DB_Connection($config['DB']);
     $db->db_connect();
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -71,7 +71,7 @@ function checkInTempTable($db, $username, $password)
   $result = pg_fetch_assoc($result);
   if (!password_verify($password, $result['password_hash']))
     return false;
-  echo json_encode(['registration' => 'register', 'role' => $result['role']]);
+  echo json_encode(['registration' => 'register', 'role' => $result['role'], 'user_email' => $result['username']]);
   return true;
 }
 

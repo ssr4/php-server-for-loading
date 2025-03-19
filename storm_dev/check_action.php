@@ -5,7 +5,7 @@ $cors->cors_policy();
 try {
 	require_once '../auth/db.php';
 	$config = parse_ini_file('../config.ini', true);
-	$db = new DB_Conncetion($config['DB']);
+	$db = new DB_Connection($config['DB']);
 	$db_connect = $db->db_connect();
 	$result_data = array();
 

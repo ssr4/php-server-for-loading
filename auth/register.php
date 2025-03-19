@@ -5,8 +5,8 @@ $cors->cors_policy();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   require_once 'db.php';
   $config = parse_ini_file('../config.ini', true);
-  $db = new DB_Conncetion($config['DB']);
-  $db->db_connect();
+  $db = new DB_Connection($config['DB']);
+  $db_connect = $db->db_connect();
 
 
   $username = $_POST['username'];
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           ) com");
     $insert_result = pg_execute($db->get_conn(), "my_query_insert", array($username, $hashed_password, $role));
     if ($insert_result === false) {
-      // print pg_last_error($db->db_connect('postgres', 'postgres'));
+      // print pg_last_error($db_connect);
       throw new RuntimeException('It`s impossible to create user');
     }
     // var_dump($insert_result);

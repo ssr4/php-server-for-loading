@@ -1,6 +1,6 @@
 <?php
 
-class DB_Conncetion
+class DB_Connection
 {
   private $db_host = '';
   private $port = '5432';
