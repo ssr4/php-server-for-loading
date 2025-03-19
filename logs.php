@@ -1,5 +1,7 @@
 <?php
-
+require_once('Cors.php');
+$cors = new Cors();
+$cors->cors_policy();
 try {
   require_once("auth/db.php");
   $config = parse_ini_file("config.ini", true);

@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $secret_key = ['secret' => $config['Secret']['secret_key']];
       $jwt = jwtEncode($header) . '.' .  jwtEncode($payload)  . '.' . jwtEncode($secret_key);
       http_response_code(200);
-      echo json_encode(['token' => $jwt, 'role' => $result['role'], 'expires_at' =>  $expires_at]);
+      echo json_encode(['token' => $jwt, 'role' => $result['role'], 'expires_at' =>  $expires_at, 'user_email' => $username]);
       closeConn();
     } else {
       http_response_code(406);
