@@ -8,12 +8,13 @@ try {
 	$db = new DB_Connection($config['DB']);
 	$db_connect = $db->db_connect();
 	$result_data = array();
-
+	$email = $_POST['email'];
 	$arr_on = $_POST["arr_on"];
 	if (isset($arr_on) && $arr_on) {
-		$sql = "select tablo_content.f_storm_action_check_on( ARRAY[" . "$arr_on" . "] )";
+		$sql = "select tablo_content.f_storm_action_check_on( ARRAY[" . "$arr_on" . "],'" . "$email"  . "')";
 		$query = pg_query($db_connect, $sql);
 		if (!$query) {
+			print pg_last_error($db_connect);
 			throw new Exception('Error during DB query insert into wk_action_check');
 		}
 
@@ -22,9 +23,10 @@ try {
 	}
 	$arr_off = $_POST["arr_off"];
 	if (isset($arr_off) && $arr_off) {
-		$sql = "select tablo_content.f_storm_action_check_off( ARRAY[" . "$arr_off" . "] )";
+		$sql = "select tablo_content.f_storm_action_check_off( ARRAY[" . "$arr_off" . "],'" . "$email"  . "')";
 		$query = pg_query($db_connect, $sql);
 		if (!$query) {
+			print pg_last_error($db_connect);
 			throw new Exception('Error during DB query insert into wk_action_check');
 		}
 		$result = pg_fetch_array($query);

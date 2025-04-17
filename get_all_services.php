@@ -22,7 +22,7 @@ try {
     }
   } else throw new RuntimeException('there is no token!');
   $username = $_POST['username'];
-  $stmt = 'SELECT d.sl_code, d.sl_name, d.directory, regions,s.sl_full_name, d.order_description  from accounts.directories d inner join accounts.service s on d.sl_code = s.sl_code';
+  $stmt = 'SELECT d.sl_code, d.sl_name, d.directory, regions,s.sl_full_name, d.order_description, d.allow_extensions  from accounts.directories d inner join accounts.service s on d.sl_code = s.sl_code';
   if ($username === 'admin') {
     $result = pg_prepare(
       $db->get_conn(),

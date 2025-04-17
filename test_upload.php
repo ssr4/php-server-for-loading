@@ -21,7 +21,10 @@ try {
     echo json_encode('Files are uploaded successfully. ');
     http_response_code(200);
     session_write_close();
-    exit();
+  } else {
+    echo json_encode('Couldn`t upload files');
+    http_response_code(405);
+    session_write_close();
   }
 } catch (InvalidArgumentException  $e) {
   http_response_code(403);
@@ -43,19 +46,26 @@ function upload_files()
   try {
     $is_correct_uploading = 0;
     // если были переданы регионы
-    if (isset($_POST['regions'])) {
-      // получаем файлы по регионам
-      $regions = explode(",", $_POST['regions']);
-      $region_number = 0;
-      if (count($regions)) {
-        foreach ($regions as $region) {
-          $region_number += 1;
-          if ((int) $region) {
-            $is_correct_uploading = upload_file($region_number);
+    $keys = array_keys($_FILES);
+    foreach ($keys as $key) {
+      $file = $_FILES[$key];
+
+      if (isset($_POST['regions'])) {
+        // получаем файлы по регионам
+        $regions = explode(",", $_POST['regions']);
+        $region_number = 0;
+
+        if (count($regions)) {
+
+          foreach ($regions as $region) {
+            $region_number += 1;
+            if ((int) $region) {
+              $is_correct_uploading = upload_file($region_number, $file);
+            }
           }
         }
-      }
-    } else $is_correct_uploading = upload_file();
+      } else $is_correct_uploading = upload_file('', $file);
+    }
     if ($is_correct_uploading)
       return 1;
     else return 0;
@@ -64,51 +74,49 @@ function upload_files()
   }
 }
 
-function upload_file($region_number = '')
+function upload_file($region_number = '', $file)
 {
   $ACCEPTABLE_FILE_SIZE = 6 * 1024 * 1024;
-  $keys = array_keys($_FILES);
-  foreach ($keys as $key) {
-    $file = $_FILES[$key];
-
-    if (
-      !isset($file['error']) ||
-      is_array($file['error'])
-    ) {
-      http_response_code(403);
-      throw new RuntimeException('Invalid parameters.');
-    }
-
-    // код ошибки файла
-    switch ($file['error']) {
-      case UPLOAD_ERR_OK:
-        break;
-      case UPLOAD_ERR_NO_FILE:
-        http_response_code(400);
-        throw new RuntimeException('No file sent.');
-      case UPLOAD_ERR_INI_SIZE:
-      case UPLOAD_ERR_FORM_SIZE:
-        http_response_code(413);
-        // header('HTTP/1.0 404 Internal Server Error');
-        throw new RuntimeException('Exceeded filesize limit.');
-      default:
-        http_response_code(409);
-        throw new RuntimeException('Unknown errors. ????? ');
-    }
-    // размер файла
-    if ($file['size'] > $ACCEPTABLE_FILE_SIZE) {
-      http_response_code(
-        413
-      );
-      exit();
-    }
-
-    $upload_dir = get_directory() . $region_number . '/';
-    if (!create_directory_and_upload_file($upload_dir, $file))
-      throw new RuntimeException('Failed to move uploaded file.');
-    else return 1;
+  // $keys = array_keys($_FILES);
+  // foreach ($keys as $key) {
+  // $file = $_FILES[$key];
+  if (
+    !isset($file['error']) ||
+    is_array($file['error'])
+  ) {
+    http_response_code(403);
+    throw new RuntimeException('Invalid parameters.');
   }
+
+  // код ошибки файла
+  switch ($file['error']) {
+    case UPLOAD_ERR_OK:
+      break;
+    case UPLOAD_ERR_NO_FILE:
+      http_response_code(400);
+      throw new RuntimeException('No file sent.');
+    case UPLOAD_ERR_INI_SIZE:
+    case UPLOAD_ERR_FORM_SIZE:
+      http_response_code(413);
+      // header('HTTP/1.0 404 Internal Server Error');
+      throw new RuntimeException('Exceeded filesize limit.');
+    default:
+      http_response_code(409);
+      throw new RuntimeException('Unknown errors. ????? ');
+  }
+  // размер файла
+  if ($file['size'] > $ACCEPTABLE_FILE_SIZE) {
+    http_response_code(
+      413
+    );
+    exit();
+  }
+  $upload_dir = get_directory() . $region_number . '/';
+  if (!create_directory_and_upload_file($upload_dir, $file)) {
+    throw new RuntimeException('Failed to move uploaded file.');
+  } else return 1;
 }
+// }
 
 function create_directory_and_upload_file($dir, $file)
 {
