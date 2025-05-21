@@ -189,3 +189,52 @@ CREATE TABLE accounts.head (
 	main bool NULL,
 	CONSTRAINT head_service_fk FOREIGN KEY (sl_code) REFERENCES accounts.service(sl_code) ON UPDATE CASCADE
 );
+
+-- tablo_content.actual_storm_actions source
+
+CREATE OR REPLACE VIEW tablo_content.actual_storm_actions
+AS SELECT wk_ch.id AS row_id,
+    wk_ch.region,
+    slz.naim AS sl_name,
+    par.naim AS par_name,
+    wk_ch.places,
+    act.action,
+    wk_ch.action_date_begin,
+    wk_ch.action_date_end,
+    wk_ch.check_date,
+    wk_ch.status,
+    wk_ch.sl_code,
+    wk_ch.param_code
+   FROM tablo_content.wk_action_check wk_ch
+     JOIN tablo_content.sp_action_24 act ON act.code_param = wk_ch.param_code AND act.code_sluzhba = wk_ch.sl_code
+     JOIN tablo_content.sp_sluzhba slz ON slz.code = wk_ch.sl_code
+     JOIN tablo_content.sp_stormparam_24 par ON par.code = wk_ch.param_code
+  ORDER BY wk_ch.id;
+
+
+-- tablo_content.actual_storm_actions_for_excel source
+
+CREATE OR REPLACE VIEW tablo_content.actual_storm_actions_for_excel
+AS SELECT wk_ch.id AS row_id,
+    wk_ch.region,
+    slz.sl_name,
+    slz.sl_full_name,
+    par.naim AS par_name,
+    wk_ch.places,
+    act.action,
+    wk_ch.action_date_begin,
+    wk_ch.action_date_end,
+    wk_ch.check_date,
+    wk_ch.status,
+    per.fullname AS check_person,
+    wk_ch.sl_code,
+    per.phone,
+    h.fullname,
+    h.post
+   FROM tablo_content.wk_action_check wk_ch
+     JOIN tablo_content.sp_action_24 act ON act.code_param = wk_ch.param_code AND act.code_sluzhba = wk_ch.sl_code
+     JOIN accounts.service slz ON slz.id = wk_ch.sl_code
+     JOIN tablo_content.sp_stormparam_24 par ON par.code = wk_ch.param_code
+     LEFT JOIN accounts.persons per ON per.email::text = wk_ch.check_person::text
+     JOIN accounts.head h ON slz.sl_code::text = h.sl_code::text AND h.main = true
+  ORDER BY wk_ch.action_date_begin;
