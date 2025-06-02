@@ -12,17 +12,24 @@ $db = new DB_Connection($config['DB']);
 $db->db_connect();
 try {
   // here test
-  $header_auth = apache_request_headers()['Authorization'];
-  if (isset($header_auth)) {
-    // получаем токен и подключаем файл конфига
-    $token = new Token($header_auth, $config['Secret']);
-    if (!$token->isValidToken()) {
-      http_response_code(401);
-      throw new RuntimeException('is not a valid token!');
-    }
-  } else throw new RuntimeException('there is no token!');
+
+  // todo uesr_email$header_auth = apache_request_headers()['Authorization_h'];
+  // if (isset($header_auth)) {
+  //   // получаем токен и подключаем файл конфига
+  //   $token = new Token($header_auth, $config['Secret']);
+  //   if (!$token->isValidToken()) {
+  //     http_response_code(401);
+  //     throw new RuntimeException('is not a valid token!');
+  //   }
+  // } else throw new RuntimeException('there is no token!');
   $username = $_POST['username'];
-  $stmt = 'SELECT d.sl_code, d.sl_name, d.directory, regions,s.sl_full_name, d.order_description, d.allow_extensions  from accounts.directories d inner join accounts.service s on d.sl_code = s.sl_code';
+  $user_email = $_POST['user_email'];
+  $stmt = 'SELECT d.sl_code, d.sl_name, d.directory, regions,s.sl_full_name, d.order_description, d.allow_extensions, 
+  (select permissions from accounts.persons p  where email =' . "'" . $user_email . "'" . ') as permissions
+  from accounts.directories d inner join accounts.service s on d.sl_code = s.sl_code';
+
+
+  // "select accounts.f_insert_new_users ('" . $username . "','" . $hashed_password  . "','" . $user_role  . "')";
   if ($username === 'admin') {
     $result = pg_prepare(
       $db->get_conn(),
