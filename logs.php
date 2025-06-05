@@ -19,7 +19,7 @@ try {
     $stmt = "select logs.insert_new_logs ('" . $creator . "','" . $event . "')";
     $query = pg_query($db_connect, $stmt);
     if (!$query) {
-      throw new Exception('Error during DB query insert into wk_action_check');
+      throw new Exception('Error during DB query insert into logs');
     }
     $result = pg_fetch_array($query);
     array_push($result_data,  array("status" => "ok", "updated_on" => $result[0]));

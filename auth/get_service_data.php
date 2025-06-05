@@ -13,10 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // понять пользователь админ или кто вообще 
     // это будет вывод из новой вьюшки
     $email = $_GET['email'];
-    $req = "SELECT * FROM accounts.user_access_simple uas where email = $1";
+    $req = "select * from accounts.select_services('" . $email . "')";
 
     $result = pg_prepare($db->get_conn(), "my_query_select", $req);
-    $result = pg_execute($db->get_conn(), "my_query_select", array($email));
+    $result = pg_execute($db->get_conn(), "my_query_select", array());
     if ($result === false) {
       http_response_code(403);
       close_conn();
