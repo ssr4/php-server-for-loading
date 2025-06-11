@@ -2,21 +2,13 @@
 // вывод ошибок при отладке
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-require_once 'Cors.php';
-$cors = new Cors();
-$cors->cors_policy();
+// require_once 'Cors.php';
+// $cors = new Cors();
+// $cors->cors_policy();
 $config = parse_ini_file("config.ini", true);
 require_once 'auth/validate_token.php';
 try {
-  $header_auth = apache_request_headers()['Authorization_h'];
-  if (isset($header_auth)) {
-    // получаем токен и подключаем файл конфига
-    $token = new Token($header_auth, $config['Secret']);
-    if (!$token->isValidToken()) {
-      http_response_code(401);
-      throw new RuntimeException('is not a valid token!');
-    }
-  } else throw new RuntimeException('there is no token!');
+  // TODO 
   if (upload_files()) {
     echo json_encode('Files are uploaded successfully. ');
     http_response_code(200);
@@ -77,9 +69,6 @@ function upload_files()
 function upload_file($region_number = '', $file)
 {
   $ACCEPTABLE_FILE_SIZE = 6 * 1024 * 1024;
-  // $keys = array_keys($_FILES);
-  // foreach ($keys as $key) {
-  // $file = $_FILES[$key];
   if (
     !isset($file['error']) ||
     is_array($file['error'])
@@ -114,7 +103,15 @@ function upload_file($region_number = '', $file)
   $upload_dir = get_directory() . $region_number . '/';
   if (!create_directory_and_upload_file($upload_dir, $file)) {
     throw new RuntimeException('Failed to move uploaded file.');
-  } else return 1;
+  } else {
+    // TODO storm_ddmmYYYY.xlsx get_directory()
+    $match = [];
+    preg_match("/storm_[0-9]{2}.[0-9]{1}.[0-9]{3}.xlsx/", $file['name'], $match);
+    if (count($match) == 1) {
+      launch_python_script($upload_dir . $file['name']);
+    }
+    return 1;
+  }
 }
 // }
 
@@ -145,4 +142,14 @@ function convert_date()
 function close_conn()
 {
   session_write_close();
+}
+
+
+
+function launch_python_script($file)
+{
+  // Запуск Python-скрипта в фоне (не блокирует ответ)
+  // TODO
+  $python_script = "/usr/share/nginx/html/build/orw_tablo/py/storm/upd_load_storm_tst.py";
+  $output = shell_exec("/usr/bin/python3 $python_script $file > /dev/null 2>&1 &");
 }

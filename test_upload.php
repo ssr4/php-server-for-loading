@@ -8,15 +8,6 @@ $cors->cors_policy();
 $config = parse_ini_file("config.ini", true);
 require_once 'auth/validate_token.php';
 try {
-  // $header_auth = apache_request_headers()['Authorization_h'];
-  // if (isset($header_auth)) {
-  //   // получаем токен и подключаем файл конфига
-  //   $token = new Token($header_auth, $config['Secret']);
-  //   if (!$token->isValidToken()) {
-  //     http_response_code(401);
-  //     throw new RuntimeException('is not a valid token!');
-  //   }
-  // } else throw new RuntimeException('there is no token!');
   // TODO 
   if (upload_files()) {
     echo json_encode('Files are uploaded successfully. ');
